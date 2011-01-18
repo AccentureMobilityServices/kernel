@@ -60,6 +60,9 @@
 #include <asm/mmu_context.h>
 #include <asm/tlb.h>
 #include "internal.h"
+#ifdef CONFIG_QEMU_TRACE
+	void qemu_trace_thread_name(char *name);
+#endif
 
 int core_uses_pid;
 char core_pattern[CORENAME_MAX_SIZE] = "core";
@@ -1014,6 +1017,9 @@ void set_task_comm(struct task_struct *tsk, char *buf)
 	strlcpy(tsk->comm, buf, sizeof(tsk->comm));
 	task_unlock(tsk);
 	perf_event_comm(tsk);
+#ifdef CONFIG_QEMU_TRACE
+	qemu_trace_thread_name(buf);
+#endif
 }
 
 int flush_old_exec(struct linux_binprm * bprm)
@@ -1370,6 +1376,10 @@ int search_binary_handler(struct linux_binprm *bprm,struct pt_regs *regs)
 
 EXPORT_SYMBOL(search_binary_handler);
 
+#ifdef CONFIG_QEMU_TRACE
+extern void qemu_trace_execve(int argc, char __user * __user * argv);
+#endif
+
 /*
  * sys_execve() executes a new program.
  */
@@ -1442,6 +1452,10 @@ int do_execve(const char * filename,
 	retval = copy_strings(bprm->argc, argv, bprm);
 	if (retval < 0)
 		goto out;
+
+#ifdef CONFIG_QEMU_TRACE
+        qemu_trace_execve(bprm->argc, argv);
+#endif
 
 	retval = search_binary_handler(bprm,regs);
 	if (retval < 0)

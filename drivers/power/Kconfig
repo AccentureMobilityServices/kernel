@@ -185,4 +185,10 @@ config CHARGER_TWL4030
 	help
 	  Say Y here to enable support for TWL4030 Battery Charge Interface.
 
+config BATTERY_GOLDFISH
+	tristate "Goldfish battery driver"
+	help
+	  Say Y to enable support for the battery and AC power in the Goldfish emulator.
+
+
 endif # POWER_SUPPLY

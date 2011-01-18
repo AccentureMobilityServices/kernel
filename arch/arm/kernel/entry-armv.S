@@ -755,6 +755,11 @@ ENTRY(__switch_to)
 #if defined(CONFIG_CC_STACKPROTECTOR) && !defined(CONFIG_SMP)
 	str	r7, [r8]
 #endif
+#ifdef CONFIG_QEMU_TRACE
+/*
+	mcr	p15, 0, r0, c15, c0, 0		@ signal context switch
+*/
+#endif
  THUMB(	mov	ip, r4			   )
 	mov	r0, r5
  ARM(	ldmia	r4, {r4 - sl, fp, sp, pc}  )	@ Load all regs saved previously

@@ -355,6 +355,7 @@ static void mousedev_event(struct input_handle *handle,
 {
 	struct mousedev *mousedev = handle->private;
 
+printk( "Mousedev event\n" );
 	switch (type) {
 
 	case EV_ABS:
@@ -599,6 +600,8 @@ static void mousedev_packet(struct mousedev_client *client,
 {
 	struct mousedev_motion *p = &client->packets[client->tail];
 
+printk( "Mousedev packet\n" );
+
 	ps2_data[0] = 0x08 |
 		((p->dx < 0) << 4) | ((p->dy < 0) << 5) | (p->buttons & 0x07);
 	ps2_data[1] = mousedev_limit_delta(p->dx, 127);
@@ -776,6 +779,7 @@ static unsigned int mousedev_poll(struct file *file, poll_table *wait)
 	unsigned int mask;
 
 	poll_wait(file, &mousedev->wait, wait);
+	
 
 	mask = mousedev->exist ? POLLOUT | POLLWRNORM : POLLHUP | POLLERR;
 	if (client->ready || client->buffer)

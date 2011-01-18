@@ -427,6 +427,11 @@ config UID_STAT
 	bool "UID based statistics tracking exported to /proc/uid_stat"
 	default n
 
+config QEMU_TRACE
+        tristate "Virtual Device for QEMU tracing"
+        ---help---
+          This is a virtual device for QEMU tracing.
+
 config VMWARE_BALLOON
 	tristate "VMware Balloon Driver"
 	depends on X86
