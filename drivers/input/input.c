@@ -176,7 +176,7 @@ static int input_handle_abs_event(struct input_dev *dev,
 				  unsigned int code, int *pval)
 {
 	bool is_mt_event;
-	int *pold;
+	int *pold = NULL;
 
 	if (code == ABS_MT_SLOT) {
 		/*
@@ -192,7 +192,11 @@ static int input_handle_abs_event(struct input_dev *dev,
 	is_mt_event = code >= ABS_MT_FIRST && code <= ABS_MT_LAST;
 
 	if (!is_mt_event) {
-		pold = &dev->absinfo[code].value;
+        if( dev->absinfo ) {
+    		pold = &dev->absinfo[code].value;
+        } else {
+            pold = NULL;
+        }
 	} else if (dev->mt) {
 		struct input_mt_slot *mtslot = &dev->mt[dev->slot];
 		pold = &mtslot->abs[code - ABS_MT_FIRST];
@@ -907,12 +911,11 @@ EXPORT_SYMBOL(input_set_keycode);
 			continue;
 
 static const struct input_device_id *input_match_device(struct input_handler *handler,
-							struct input_dev *dev)
+							struct input_dev *dev, const struct input_device_id *id)
 {
-	const struct input_device_id *id;
 	int i;
 
-	for (id = handler->id_table; id->flags || id->driver_info; id++) {
+	for (; id->flags || id->driver_info; id++) {
 
 		if (id->flags & INPUT_DEVICE_ID_MATCH_BUS)
 			if (id->bustype != dev->id.bustype)
@@ -952,18 +955,28 @@ static int input_attach_handler(struct input_dev *dev, struct input_handler *han
 	const struct input_device_id *id;
 	int error;
 
-	id = input_match_device(handler, dev);
-	if (!id)
-		return -ENODEV;
+    id = handler->id_table;
+    error = -ENODEV;
 
-	error = handler->connect(handler, dev, id);
-	if (error && error != -ENODEV)
-		printk(KERN_ERR
-			"input: failed to attach handler %s to device %s, "
-			"error: %d\n",
-			handler->name, kobject_name(&dev->dev.kobj), error);
+    /* we need to try the handler until all possible devices have been scanned. Some handlers
+    can deal with several different types of device and dev might be more than one of these */
+    for(;;) {
+	    id = input_match_device(handler, dev, id);
+	    if (!id)
+		    return -ENODEV;
 
-	return error;
+	    error = handler->connect(handler, dev, id);
+	    if (error && error != -ENODEV) {
+            printk(KERN_ERR
+			    "input: failed to attach handler %s to device %s, "
+			    "error: %d\n",
+			    handler->name, kobject_name(&dev->dev.kobj), error);
+
+	        return error;
+        }
+        error = 0;
+        id++;
+    }
 }
 
 #ifdef CONFIG_COMPAT

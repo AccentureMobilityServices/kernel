@@ -2100,14 +2100,15 @@ config FB_GOLDFISH
 	select FB_CFB_IMAGEBLIT
 	---help---
 	  Framebuffer driver for Goldfish Virtual Platform
+
 config FB_GOLDFISH_S2
-	tristate "Goldfish Framebuffer"
+	tristate "Goldfish second framebuffer"
 	depends on FB
 	select FB_CFB_FILLRECT
 	select FB_CFB_COPYAREA
 	select FB_CFB_IMAGEBLIT
 	---help---
-	  Framebuffer driver for Goldfish Virtual Platform
+	  Framebuffer driver for Goldfish Virtual Platform second display
 
 
 config FB_COBALT

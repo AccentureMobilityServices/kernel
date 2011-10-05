@@ -403,12 +403,31 @@ static void __init smp_init(void)
  * parsing is performed in place, and we should allow a component to
  * store reference of name/value for future reference.
  */
+
+/* Exporter for the hostNativeOpenGL contiguous memnory allocation address. */
+char *hostNativeOpenGL_contiguousBootMemAddress = 0;
+char *hostNativeOpenGL_getContiguousAddrFromInit()
+{
+	return hostNativeOpenGL_contiguousBootMemAddress;
+}
+EXPORT_SYMBOL_GPL(hostNativeOpenGL_getContiguousAddrFromInit);
+
+
 static void __init setup_command_line(char *command_line)
 {
 	saved_command_line = alloc_bootmem(strlen (boot_command_line)+1);
 	static_command_line = alloc_bootmem(strlen (command_line)+1);
 	strcpy (saved_command_line, boot_command_line);
 	strcpy (static_command_line, command_line);
+
+	printk(KERN_INFO "hostNativeOpenGL -> Alocating 8MB of contiguous address space from alloc_bootmen_low...");
+	hostNativeOpenGL_contiguousBootMemAddress = alloc_bootmem_low (0x800000);
+	if (hostNativeOpenGL_contiguousBootMemAddress)
+	{
+		printk(KERN_INFO "    Success!  Physical address: 0x%x", (int)hostNativeOpenGL_contiguousBootMemAddress);
+	} else {
+		printk(KERN_INFO "    Failed!");
+	}
 }
 
 /*

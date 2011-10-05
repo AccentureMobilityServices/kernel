@@ -321,6 +321,7 @@ static void mousedev_notify_readers(struct mousedev *mousedev,
 
 	if (wake_readers)
 		wake_up_interruptible(&mousedev->wait);
+
 }
 
 static void mousedev_touchpad_touch(struct mousedev *mousedev, int value)
